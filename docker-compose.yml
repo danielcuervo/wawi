@@ -1,55 +1,23 @@
 version: '2'
 services:
   messenger:
-    image: golang:1.9-alpine
+    image: lejianaranja/golang:latest
     volumes:
-      - ./messenger:/go/src/wawi/messenger
-    working_dir: /go/src/wawi/messenger
-    command: go run messenger.go
+      - ./messenger:/go/src/code
     ports:
       - "800:80"
 
   budgeteer:
-    image: golang:1.9-alpine
+    image: lejianaranja/golang:latest
     volumes:
-      - ./budgeteer:/go/src/wawi/budgeteer
-    working_dir: /go/src/wawi/budgeteer
-    command: go run budgeteer.go
+      - ./budgeteer:/go/src/code
     ports:
       - "801:80"
 
   accountant:
-    image: golang:1.9-alpine
+    image: lejianaranja/golang:latest
     volumes:
-      - ./accountant:/go/src/wawi/accountant
-    working_dir: /go/src/wawi/accountant
-    command: go run accountant.go
+      - ./accountant:/go/src/code
     ports:
       - "802:80"
 
-  scheduler:
-    image: golang:1.9-alpine
-    volumes:
-      - ./scheduler:/go/src/wawi/scheduler
-    working_dir: /go/src/wawi/scheduler
-    command: go run scheduler.go
-    ports:
-      - "803:80"
-
-  labeler:
-    image: golang:1.9-alpine3.6
-    volumes:
-      - ./labeler:/go/src/wawi/labeler
-    working_dir: /go/src/wawi/labeler
-    command: go run labeler.go
-    ports:
-      - "804:80"
-
-  people:
-    image: golang:1.9-alpine3.6
-    volumes:
-      - ./people:/go/src/wawi/people
-    working_dir: /go/src/wawi/people
-    command: go run people.go
-    ports:
-      - "805:80"
