@@ -1,8 +1,10 @@
 FROM golang:1.10-alpine
 
-ADD . /go/src/code
+ARG SERVICE_NAME
 
-WORKDIR /go/src/code
+ADD . /go/src/github.com/danielcuervo/wawi/${SERVICE_NAME}
+
+WORKDIR /go/src/github.com/danielcuervo/wawi/${SERVICE_NAME}
 
 RUN apk update \
     && apk upgrade \

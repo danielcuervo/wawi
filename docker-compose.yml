@@ -1,25 +1,15 @@
 version: '2'
 services:
-  messenger:
-    image: lejianaranja/golang:latest
+  messagebus:
+    build:
+      context: .
+      args:
+        SERVICE_NAME: messagebus
     volumes:
-      - ./messenger:/go/src/code
+      - ./messagebus:/go/src/github.com/danielcuervo/wawi/messagebus
     ports:
       - "800:80"
 
-  inventory:
-    image: lejianaranja/golang:latest
-    volumes:
-      - ./inventory:/go/src/code
-    ports:
-      - "801:80"
-
-  logistics:
-    image: lejianaranja/golang:latest
-    volumes:
-      - ./logistics:/go/src/code
-    ports:
-      - "802:80"
 
   kafka:
     image: spotify/kafka
