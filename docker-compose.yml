@@ -7,17 +7,23 @@ services:
     ports:
       - "800:80"
 
-  budgeteer:
+  inventory:
     image: lejianaranja/golang:latest
     volumes:
-      - ./budgeteer:/go/src/code
+      - ./inventory:/go/src/code
     ports:
       - "801:80"
 
-  accountant:
+  logistics:
     image: lejianaranja/golang:latest
     volumes:
-      - ./accountant:/go/src/code
+      - ./logistics:/go/src/code
     ports:
       - "802:80"
+
+  kafka:
+    image: spotify/kafka
+    ports:
+      - "2181:2181"
+      - "9092:9092"
 

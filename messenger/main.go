@@ -1,15 +1,10 @@
 package main
 
 import (
-"fmt"
-"net/http"
+	"github.com/danielcuervo/wawi/messenger/messenger"
 )
 
-func handler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Messenger", r.URL.Path[1:])
-}
-
 func main() {
-	http.HandleFunc("/", handler)
-	http.ListenAndServe(":80", nil)
+	messengerServer := messenger.NewHttpServer()
+	messengerServer.Serve()
 }
