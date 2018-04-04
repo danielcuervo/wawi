@@ -9,6 +9,15 @@ services:
       - ./messagebus:/go/src/github.com/danielcuervo/wawi/messagebus
     ports:
       - "800:80"
+  logistics:
+    build:
+      context: .
+      args:
+        SERVICE_NAME: logistics
+    volumes:
+      - ./logistics:/go/src/github.com/danielcuervo/wawi/logistics
+    ports:
+      - "801:81"
 
 
   kafka:

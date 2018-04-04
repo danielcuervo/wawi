@@ -1,0 +1,96 @@
+{
+    "services": {
+        "crosspromotion": {
+            "description": "Cross promotion service",
+            "operations": {
+                "get": {
+                    "description": "Get cross promotion settings",
+                    "errors": {
+                        "invalid_application": {
+                            "description": "One of the applications provided is not valid"
+                        },
+                        "invalid_game": {
+                            "description": "The game provided is not valid"
+                        },
+                        "invalid_platform": {
+                            "description": "The platform provided is not valid"
+                        }
+                    },
+                    "inputs": {
+                        "apps_installed": {
+                            "required": true,
+                            "type": "string"
+                        },
+                        "fake": {
+                            "default": false,
+                            "type": "boolean"
+                        },
+                        "platform": {
+                            "required": true,
+                            "type": "string"
+                        },
+                        "user_id": {
+                            "required": true,
+                            "type": "string"
+                        }
+                    },
+                    "outputs": {
+                        "xpromo": {
+                            "banners": {
+                                "structure": "banner",
+                                "type": "list"
+                            },
+                            "check_apps": {
+                                "structure": "string",
+                                "type": "list"
+                            },
+                            "id": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "geoip": {
+            "description": "IP address to geo location converter",
+            "operations": {
+                "locate": {
+                    "description": "Given an IP address find the location",
+                    "inputs": {
+                        "ip": {
+                            "required": true,
+                            "type": "string"
+                        }
+                    },
+                    "outputs": {
+                        "location": {
+                            "city": {
+                                "type": "string"
+                            },
+                            "coutry": {
+                                "type": "string"
+                            },
+                            "latitude": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "structures": {
+        "banner": {
+            "app_id": {},
+            "background": {},
+            "button": {},
+            "current": {
+                "type": "boolean"
+            },
+            "game": {},
+            "store_id": {}
+        },
+        "xpromo": {}
+    }
+}

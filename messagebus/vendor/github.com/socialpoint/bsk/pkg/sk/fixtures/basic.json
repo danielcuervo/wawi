@@ -1,0 +1,37 @@
+{
+    "services": {
+        "basic": {
+            "description": "Basic service definition",
+            "operations": {
+                "greet": {
+                    "description": "Greet by name",
+                    "inputs": {
+                        "length": {
+                            "cli": {
+                                "position": 1
+                            },
+                            "description": "the length",
+                            "required": true,
+                            "type": "integer"
+                        },
+                        "name": {
+                            "cli": {
+                                "position": 0
+                            },
+                            "description": "the name",
+                            "required": true,
+                            "type": "string"
+                        }
+                    },
+                    "method": "GET",
+                    "outputs": {
+                        "greetings": {
+                            "description": "the greetings",
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

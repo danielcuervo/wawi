@@ -55,9 +55,15 @@
   packages = ["."]
   revision = "8732c616f52954686704c8645fe1a9d59e9df7c1"
 
+[[projects]]
+  branch = "master"
+  name = "github.com/socialpoint/bsk"
+  packages = ["pkg/uuid"]
+  revision = "8ab33a0f86e407992bb404977c04a2fbecebd4a7"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "5b31b379cfa010c2f9991c1ea5dd4e6c5d0b8a871433e57afe8eecdd1e2810cd"
+  inputs-digest = "0e8f97398a7a0c9ad8b593b0ddb2fa12ee9ca3156436fe6dc1ccd6035fcf0845"
   solver-name = "gps-cdcl"
   solver-version = 1

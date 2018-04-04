@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"encoding/json"
-	"github.com/Shopify/sarama"
 )
 
 type Message interface {
@@ -23,7 +22,7 @@ type Server interface {
 }
 
 type Consumer interface {
-	Consume(msg Message)
+	Consume(topic string)
 }
 
 type httpServer struct {
@@ -61,7 +60,21 @@ func (hs *httpServer) handler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Wrong message")
 		return
 	}
-
-	broker := sarama.NewBroker("kafka")
-	broker.Close()
 }
+
+
+type HelloWorld struct {
+	Uuid string
+}
+
+func (hw *HelloWorld) Topic() string {
+	return "hello_world"
+}
+
+func (hw *HelloWorld) Payload() map[string]interface{} {
+	return map[string]interface{}{
+		"uuid": hw.Uuid,
+	}
+}
+
+
