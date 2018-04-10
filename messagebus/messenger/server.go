@@ -1,10 +1,10 @@
 package messenger
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"encoding/json"
 )
 
 type Message interface {
@@ -15,6 +15,14 @@ type Message interface {
 type message struct {
 	topic   string
 	payload map[string]interface{}
+}
+
+func (m *message) Topic() string {
+	return m.topic
+}
+
+func (m *message) Payload() map[string]interface{} {
+	return m.payload
 }
 
 type Server interface {
@@ -30,6 +38,10 @@ type httpServer struct {
 
 func NewHttpServer() *httpServer {
 	return &httpServer{}
+}
+
+type Handler interface {
+	Handle(msg Message)
 }
 
 func (hs *httpServer) Serve() {
@@ -61,20 +73,3 @@ func (hs *httpServer) handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
-
-
-type HelloWorld struct {
-	Uuid string
-}
-
-func (hw *HelloWorld) Topic() string {
-	return "hello_world"
-}
-
-func (hw *HelloWorld) Payload() map[string]interface{} {
-	return map[string]interface{}{
-		"uuid": hw.Uuid,
-	}
-}
-
-
