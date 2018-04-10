@@ -1,4 +1,4 @@
-package messenger
+package driver
 
 import (
 	"context"
@@ -6,47 +6,49 @@ import (
 	"log"
 
 	"github.com/Shopify/sarama"
+	"github.com/danielcuervo/wawi/messagebus/messenger"
 )
 
 type kafkaDriver struct {
+	address     string
 	consumer    sarama.PartitionConsumer
 	producer    sarama.AsyncProducer
-	receivedMsg chan Message
+	receivedMsg chan messenger.Message
 }
 
 // Creates a driver that consumes kafka messages
-func NewKafkaDriver(address string, topic string) (*kafkaDriver, error) {
-	master, err := sarama.NewConsumer([]string{address}, sarama.NewConfig())
-	if err != nil {
-		return nil, err
-	}
-	consumer, err := master.ConsumePartition(topic, 0, sarama.OffsetOldest)
-	if err != nil {
-		return nil, err
-	}
-
+func NewKafkaDriver(address string) (*kafkaDriver, error) {
 	producer, err := sarama.NewAsyncProducer([]string{address}, sarama.NewConfig())
 	if err != nil {
 		log.Println(err.Error())
 		return nil, err
 	}
 
-	return &kafkaDriver{consumer: consumer, producer: producer, receivedMsg: make(chan Message)}, nil
+	return &kafkaDriver{address: address, producer: producer, receivedMsg: make(chan messenger.Message)}, nil
 }
 
-func (kd *kafkaDriver) Receive() <-chan Message {
+func (kd *kafkaDriver) Receive() <-chan messenger.Message {
 	return kd.receivedMsg
 }
 
-func (kd *kafkaDriver) Listen(ctx context.Context) {
+func (kd *kafkaDriver) Consume(topic string, ctx context.Context) error {
+	master, err := sarama.NewConsumer([]string{kd.address}, sarama.NewConfig())
+	if err != nil {
+		return err
+	}
+	consumer, err := master.ConsumePartition(topic, 0, sarama.OffsetOldest)
+	if err != nil {
+		return err
+	}
+
 	go func() {
 		for {
 			select {
-			case err := <-kd.consumer.Errors():
+			case err := <-consumer.Errors():
 				log.Println(err.Error())
 			case <-ctx.Done():
 				return
-			case msg := <-kd.consumer.Messages():
+			case msg := <-consumer.Messages():
 				payload := &map[string]interface{}{}
 				json.Unmarshal(msg.Value, payload)
 				kd.receivedMsg <- &message{
@@ -56,21 +58,22 @@ func (kd *kafkaDriver) Listen(ctx context.Context) {
 			}
 		}
 	}()
+
+	<-ctx.Done()
+	return nil
 }
 
-func (kd *kafkaDriver) Dispatch(msg Message) {
+func (kd *kafkaDriver) Dispatch(msg messenger.Message) error {
 	kd.producer.Input() <- &sarama.ProducerMessage{
 		Topic: msg.Topic(),
-		Value: NewPayloadEncoder(msg.Payload()),
+		Value: &payloadEncoder{msg.Payload()},
 	}
+
+	return nil
 }
 
 type payloadEncoder struct {
 	Payload map[string]interface{}
-}
-
-func NewPayloadEncoder(payload map[string]interface{}) *payloadEncoder {
-	return &payloadEncoder{Payload: payload}
 }
 
 func (pe *payloadEncoder) Length() int {

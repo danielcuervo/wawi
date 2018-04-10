@@ -7,6 +7,7 @@ import (
 	"net"
 	"time"
 
+	"github.com/danielcuervo/wawi/messagebus/driver"
 	"github.com/danielcuervo/wawi/messagebus/messenger"
 	"github.com/socialpoint/bsk/pkg/uuid"
 )
@@ -17,30 +18,21 @@ func main() {
 	ensureServicesAreAlive()
 
 	stop := make(chan bool)
-	kafkaDriver, err := messenger.NewKafkaDriver(
-		"kafka:9092",
-		"hello_world",
-	)
+	kafkaDriver, err := driver.NewKafkaDriver("kafka:9092")
 	if err != nil {
 		log.Println(err.Error())
 		return
 	}
-	consumer := messenger.NewConsumer(
-		kafkaDriver,
-		&helloWorldHandler{
-			count: 0,
-			stop:  stop,
-		},
-	)
+
+	client := messenger.NewClient(kafkaDriver, driver.NewNullLogger())
+	go client.Consume("hello_world", &helloWorldHandler{})
 
 	log.Println("Starting consumer")
-	go consumer.Consume()
 
 	log.Println("Dispatching")
-	dispatcher := messenger.NewDispatcher(kafkaDriver)
 	for i := 0; i < 10; i++ {
 		log.Println("Message" + strconv.Itoa(i))
-		dispatcher.Dispatch(
+		client.Dispatch(
 			&helloWorld{
 				Uuid: uuid.New(),
 			},
@@ -77,14 +69,12 @@ func (hw *helloWorld) Payload() map[string]interface{} {
 }
 
 type helloWorldHandler struct {
-	count int
-	stop  chan bool
 }
 
 func (hwh *helloWorldHandler) Handle(msg messenger.Message) {
-	hwh.count++
-	if hwh.count == 10 {
-		log.Println("yes!")
-		hwh.stop <- true
-	}
+	log.Println(msg.Topic())
+}
+
+func (hwh *helloWorldHandler) Name() string {
+	return "hello_world_handler"
 }
