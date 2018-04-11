@@ -34,32 +34,32 @@ func (kd *kafkaDriver) Receive() <-chan messenger.Message {
 func (kd *kafkaDriver) Consume(topic string, ctx context.Context) error {
 	master, err := sarama.NewConsumer([]string{kd.address}, sarama.NewConfig())
 	if err != nil {
+		log.Println(err)
 		return err
 	}
-	consumer, err := master.ConsumePartition(topic, 0, sarama.OffsetOldest)
+	consumer, err := master.ConsumePartition(topic, 0, sarama.OffsetNewest)
 	if err != nil {
+		log.Println(err)
 		return err
 	}
 
-	go func() {
-		for {
-			select {
-			case err := <-consumer.Errors():
-				log.Println(err.Error())
-			case <-ctx.Done():
-				return
-			case msg := <-consumer.Messages():
-				payload := &map[string]interface{}{}
-				json.Unmarshal(msg.Value, payload)
-				kd.receivedMsg <- &message{
-					topic:   msg.Topic,
-					payload: *payload,
-				}
+	for {
+		select {
+		case err := <-consumer.Errors():
+			log.Println(err.Error())
+		case <-ctx.Done():
+			return nil
+		case msg := <-consumer.Messages():
+			log.Println("received")
+			payload := &map[string]interface{}{}
+			json.Unmarshal(msg.Value, payload)
+			kd.receivedMsg <- &message{
+				topic:   msg.Topic,
+				payload: *payload,
 			}
 		}
-	}()
+	}
 
-	<-ctx.Done()
 	return nil
 }
 

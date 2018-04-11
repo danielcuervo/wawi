@@ -9,7 +9,6 @@ import (
 
 	"github.com/danielcuervo/wawi/messagebus/driver"
 	"github.com/danielcuervo/wawi/messagebus/messenger"
-	"github.com/socialpoint/bsk/pkg/uuid"
 )
 
 func main() {
@@ -34,7 +33,7 @@ func main() {
 		log.Println("Message" + strconv.Itoa(i))
 		client.Dispatch(
 			&helloWorld{
-				Uuid: uuid.New(),
+				Number: strconv.Itoa(i),
 			},
 		)
 	}
@@ -55,7 +54,7 @@ func ensureServicesAreAlive() {
 }
 
 type helloWorld struct {
-	Uuid string
+	Number string
 }
 
 func (m *helloWorld) Topic() string {
@@ -64,7 +63,7 @@ func (m *helloWorld) Topic() string {
 
 func (hw *helloWorld) Payload() map[string]interface{} {
 	return map[string]interface{}{
-		"uuid": hw.Uuid,
+		"number": hw.Number,
 	}
 }
 

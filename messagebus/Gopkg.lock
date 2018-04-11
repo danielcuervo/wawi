@@ -50,20 +50,26 @@
   version = "v0.1.1"
 
 [[projects]]
+  name = "github.com/pmezard/go-difflib"
+  packages = ["difflib"]
+  revision = "792786c7400a136282c1664665ae0a8db921c6c2"
+  version = "v1.0.0"
+
+[[projects]]
   branch = "master"
   name = "github.com/rcrowley/go-metrics"
   packages = ["."]
   revision = "8732c616f52954686704c8645fe1a9d59e9df7c1"
 
 [[projects]]
-  branch = "master"
-  name = "github.com/socialpoint/bsk"
-  packages = ["pkg/uuid"]
-  revision = "8ab33a0f86e407992bb404977c04a2fbecebd4a7"
+  name = "github.com/stretchr/testify"
+  packages = ["assert"]
+  revision = "12b6f73e6084dad08a7c6e575284b177ecafbc71"
+  version = "v1.2.1"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "0e8f97398a7a0c9ad8b593b0ddb2fa12ee9ca3156436fe6dc1ccd6035fcf0845"
+  inputs-digest = "cf8ee6e9d0077e574c509e53052127c93e6ee2d3a8c8380702ff91b8d7d3465e"
   solver-name = "gps-cdcl"
   solver-version = 1

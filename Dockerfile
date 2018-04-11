@@ -9,6 +9,7 @@ WORKDIR /go/src/github.com/danielcuervo/wawi/${SERVICE_NAME}
 RUN apk update \
     && apk upgrade \
     && apk add git \
+    && apk add gcc \
     && go get -u github.com/golang/dep/cmd/dep \
     && dep init
 
