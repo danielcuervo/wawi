@@ -23,7 +23,7 @@ func main() {
 		return
 	}
 
-	client := messenger.NewClient(kafkaDriver, driver.NewNullLogger())
+	client := messenger.NewMessenger(kafkaDriver, driver.NewNullLogger())
 	go client.Consume("hello_world", &helloWorldHandler{})
 
 	log.Println("Starting consumer")

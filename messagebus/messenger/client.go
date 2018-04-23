@@ -2,51 +2,97 @@ package messenger
 
 import (
 	"context"
+
 	"sync"
 )
 
-type client struct {
-	driver        Driver
-	logger        Logger
-	registerMutex sync.Mutex
-	consumers     map[string]map[string]context.CancelFunc
+type messenger struct {
+	driver    Driver
+	logger    Logger
+	mutex     sync.Mutex
+	consuming bool
+	registry  map[string]map[string]register
 }
 
-func NewClient(driver Driver, logger Logger) *client {
-	return &client{
-		driver:        driver,
-		logger:        logger,
-		registerMutex: sync.Mutex{},
-		consumers:     make(map[string]map[string]context.CancelFunc),
+type register struct {
+	Handler    Handler
+	CancelFunc context.CancelFunc
+}
+
+// Client to use the messenger it abstracts consuming/dispatching from the tool of choice and holds ebs functionality
+func NewMessenger(driver Driver, logger Logger) *messenger {
+	return &messenger{
+		driver:    driver,
+		logger:    logger,
+		mutex:     sync.Mutex{},
+		consuming: false,
+		registry:  make(map[string]map[string]register),
 	}
 }
 
-func (c *client) Consume(topic string, handler Handler) {
+// Creates a consumer to consume a topic and passes it to the handler
+// stores it's cancel func in the consumers
+func (c *messenger) Consume(topic string, handler Handler) {
 	ctx, cancelFunc := context.WithCancel(context.Background())
-	defer cancelFunc()
 
-	go c.driver.Consume(topic, ctx)
 	c.register(topic, handler, cancelFunc)
+	go c.driver.Consume(topic, ctx)
+	c.start(ctx)
+}
+
+func (c *messenger) register(topic string, handler Handler, cancelFunc context.CancelFunc) {
+	c.mutex.Lock()
+	if c.registry[topic] == nil {
+		c.registry[topic] = make(map[string]register)
+	}
+
+	c.registry[topic][handler.Name()] = register{
+		Handler:    handler,
+		CancelFunc: cancelFunc,
+	}
+	c.mutex.Unlock()
+}
+
+func (c *messenger) start(ctx context.Context) {
+	c.mutex.Lock()
+	if c.consuming {
+		c.mutex.Unlock()
+		return
+	}
+
+	c.consuming = true
+	c.mutex.Unlock()
 
 	for {
 		select {
 		case <-ctx.Done():
 			break
 		case msg := <-c.driver.Receive():
-			handler.Handle(msg)
+			topic := msg.Topic()
+			c.mutex.Lock()
+			handlers := c.registry[topic]
+			c.mutex.Unlock()
+			for _, handler := range handlers {
+				handler.Handler.Handle(msg)
+			}
+
 		}
 	}
 }
 
-func (c *client) Dispatch(msg Message) {
+// Dispatches a message
+func (c *messenger) Dispatch(msg Message) {
 	c.driver.Dispatch(msg)
 }
-func (c *client) register(topic string, handler Handler, cancelFunc context.CancelFunc) {
-	c.registerMutex.Lock()
-	defer c.registerMutex.Unlock()
-	if c.consumers[topic] == nil {
-		c.consumers[topic] = make(map[string]context.CancelFunc)
+
+// Service function to give control over consumer stops
+func (c *messenger) StopConsumer(topic string, handlerName string) {
+	c.mutex.Lock()
+	if c.registry[topic] == nil {
+		return
 	}
 
-	c.consumers[topic][handler.Name()] = cancelFunc
+	c.registry[topic][handlerName].CancelFunc()
+	c.registry[topic] = make(map[string]register)
+	c.mutex.Unlock()
 }
