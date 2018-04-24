@@ -1,4 +1,4 @@
-package driver
+package kafka
 
 import (
 	"context"
@@ -84,7 +84,21 @@ func (pe *payloadEncoder) Length() int {
 
 	return len(encoded)
 }
+
 func (pe *payloadEncoder) Encode() ([]byte, error) {
 	encoded, err := json.Marshal(pe.Payload)
 	return encoded, err
+}
+
+type message struct {
+	topic   string
+	payload map[string]interface{}
+}
+
+func (m *message) Topic() string {
+	return m.topic
+}
+
+func (m *message) Payload() map[string]interface{} {
+	return m.payload
 }

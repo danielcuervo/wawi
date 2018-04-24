@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/danielcuervo/wawi/messagebus/driver"
+	"github.com/danielcuervo/wawi/messagebus/driver/kafka"
 	"github.com/danielcuervo/wawi/messagebus/messenger"
 )
 
@@ -17,7 +18,7 @@ func main() {
 	ensureServicesAreAlive()
 
 	stop := make(chan bool)
-	kafkaDriver, err := driver.NewKafkaDriver("kafka:9092")
+	kafkaDriver, err := kafka.NewKafkaDriver("kafka:9092")
 	if err != nil {
 		log.Println(err.Error())
 		return
