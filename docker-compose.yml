@@ -9,6 +9,7 @@ services:
       - ./messagebus:/go/src/github.com/danielcuervo/wawi/messagebus
     ports:
       - "800:80"
+
   logistics:
     build:
       context: .
@@ -19,11 +20,22 @@ services:
     ports:
       - "801:81"
 
-
   kafka:
     image: spotify/kafka
     ports:
       - "2181:2181"
       - "9092:9092"
 
+  elastic:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.0.1
+    ports:
+      - "9200:9200"
+    environment:
+      - http.host=0.0.0.0
+      - transport.host=127.0.0.1
+      - xpack.security.enabled=false
+    volumes:
+      - elastic_data:/usr/share/elasticsearch/data
 
+volumes:
+  elastic_data:
